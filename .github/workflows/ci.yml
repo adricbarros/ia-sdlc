@@ -1,0 +1,31 @@
+name: CI - Code Quality & Security
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Necessário para o SonarCloud analisar o histórico completo
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.9' # Ou a versão que você usou no MVP
+
+      - name: Análise Estática com SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # O GitHub gera esse token sozinho
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # O token que você salvou no passo 1

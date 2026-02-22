@@ -25,3 +25,7 @@ static/uploads/*
 .vscode/
 .idea/
 .DS_Store
+
+# Arquivos de estudo e backup
+doc/
+resgate.py
