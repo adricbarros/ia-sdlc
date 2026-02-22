@@ -25,7 +25,7 @@ jobs:
           python-version: '3.11.9' # Ou a versão que você usou no MVP
 
       - name: Análise Estática com SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # O GitHub gera esse token sozinho
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # O token que você salvou no passo 1
