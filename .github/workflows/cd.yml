@@ -1,0 +1,25 @@
+name: CD - Deploy no Debian
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Atualizar Servidor e Reiniciar
+    runs-on: self-hosted
+    steps:
+      - name: Puxar o código mais recente
+        uses: actions/checkout@v4
+
+      - name: Atualizar dependências (se houver)
+        run: |
+          # Ativa o ambiente virtual e instala pacotes novos
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Reiniciar o serviço da aplicação
+        run: |
+          # Reinicia a aplicação para carregar o novo código
+          sudo systemctl restart ia-sdlc.service
