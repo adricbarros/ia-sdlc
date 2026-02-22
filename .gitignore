@@ -27,5 +27,5 @@ static/uploads/*
 .DS_Store
 
 # Arquivos de estudo e backup
-doc/
+docs/
 resgate.py
