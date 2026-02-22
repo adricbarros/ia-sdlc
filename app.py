@@ -705,4 +705,4 @@ if __name__ == '__main__':
             print("Bootstrapping concluído: Secretaria Padrão e Usuário Admin criados.")
 
     # Inicia o servidor Flask
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=5555)
