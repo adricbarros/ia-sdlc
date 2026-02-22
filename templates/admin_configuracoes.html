@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurações do Órgão - PCA</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+                {% if ente and ente.logo_path %}
+                    <img src="{{ url_for('static', filename=ente.logo_path) }}" height="35" class="me-2 rounded bg-white p-1">
+                {% endif %}
+                PCA - {{ ente.nome if ente else 'Área Restrita' }}
+            </a>
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Contratações</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/secretarias">Secretarias</a></li>
+                <li class="nav-item"><a class="nav-link" href="/admin/usuarios">Usuários</a></li>
+                <li class="nav-item"><a class="nav-link active fw-bold text-warning" href="/admin/configuracoes">⚙️ Configurações</a></li>
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/admin/logout" class="btn btn-outline-light btn-sm">Sair do Painel</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 flex-grow-1">
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success py-2 shadow-sm">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+            <div class="card-header bg-warning text-dark fw-bold">
+                ⚙️ Identidade do Órgão / Ente Público
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/admin/configuracoes" enctype="multipart/form-data">
+                    <div class="mb-3 text-center">
+                        {% if ente and ente.logo_path %}
+                            <img src="{{ url_for('static', filename=ente.logo_path) }}" alt="Logo" class="img-thumbnail mb-2" style="max-height: 120px;">
+                        {% endif %}
+                        <label class="form-label fw-bold w-100 text-start">Logotipo do Órgão</label>
+                        <input type="file" name="logo" class="form-control" accept="image/*">
+                        <small class="text-muted">Formatos aceitos: PNG, JPG.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nome da Instituição</label>
+                        <input type="text" name="nome" class="form-control" value="{{ ente.nome if ente else '' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Endereço Completo</label>
+                        <input type="text" name="endereco" class="form-control" value="{{ ente.endereco if ente else '' }}">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Telefone</label>
+                            <input type="text" name="telefone" class="form-control" value="{{ ente.telefone if ente else '' }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">E-mail de Contato</label>
+                            <input type="email" name="email" class="form-control" value="{{ ente.email if ente else '' }}">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">Salvar Configurações</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

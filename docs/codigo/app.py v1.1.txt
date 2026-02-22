@@ -1,0 +1,120 @@
+# CODIGO CORRIGIDO GEMINI RAPIDO V 1.1
+import os
+from datetime import datetime
+from flask import Flask, render_template, redirect, url_for, request, flash, send_file, session
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+import pandas as pd
+import io
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+
+# Importamos o db e os modelos do seu arquivo models.py
+from models import db, Usuario, Secretaria, Contratacao
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'desafio-tecnico-sdlc')
+
+# CONFIGURAÇÃO MYSQL 9.1
+# O host 'mysql' é para quando rodarmos no Docker do Debian. 
+# O fallback 'localhost' é para seus testes atuais no Windows.
+DB_USER = 'root'
+DB_PASS = os.environ.get('DB_PASSWORD', '') # No Windows geralmente é vazio ou sua senha
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_NAME = 'pca_sdlc'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+# ============================================================================
+# ROTAS DE TRANSPARÊNCIA (PÚBLICAS)
+# ============================================================================
+
+@app.route('/')
+def home():
+    secretarias = Secretaria.query.all()
+    # Filtros
+    sec_id = request.args.get('secretaria')
+    exercicio = request.args.get('exercicio')
+    codigo = request.args.get('codigo')
+
+    query = Contratacao.query
+    if sec_id:
+        query = query.filter_by(secretaria_id=sec_id)
+    if exercicio:
+        query = query.filter_by(exercicio=exercicio)
+    if codigo:
+        query = query.filter(Contratacao.codigo_identificador.like(f"%{codigo}%"))
+
+    contratacoes = query.all()
+    return render_template('home.html', contratacoes=contratacoes, secretarias=secretarias)
+
+# ============================================================================
+# EXPORTAÇÃO (PÚBLICA)
+# ============================================================================
+
+@app.route('/exportar/excel')
+def exportar_excel():
+    # Lógica simplificada: exporta o que estiver no banco
+    contratacoes = Contratacao.query.all()
+    data = []
+    for c in contratacoes:
+        data.append({
+            'Código': c.codigo_identificador, # Aqui usamos a Generated Column do MySQL!
+            'Exercício': c.exercicio,
+            'Objeto': c.objeto,
+            'Valor Estimado': c.valor_estimado,
+            'Secretaria': c.secretaria.nome
+        })
+    
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+    output.seek(0)
+    
+    return send_file(output, download_name="PCA_Transparencia.xlsx", as_attachment=True)
+
+# ============================================================================
+# ÁREA ADMINISTRATIVA (PRIVADA)
+# ============================================================================
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        login = request.form.get('username')
+        senha = request.form.get('password')
+        user = Usuario.query.filter_by(login=login).first()
+        
+        if user and check_password_hash(user.senha, senha):
+            session['user_id'] = user.id
+            session['user_nome'] = user.nome
+            return redirect(url_for('admin_dashboard'))
+        flash('Credenciais inválidas.')
+    return render_template('admin_login.html')
+
+@app.route('/admin/cadastrar/contratacao', methods=['POST'])
+def cadastrar_contratacao():
+    if 'user_id' not in session: return redirect(url_for('admin_login'))
+    
+    # IMPORTANTE: Não enviamos o 'codigo_identificador' no form. 
+    # O MySQL 9.1 vai gerá-lo automaticamente graças ao Computed column no models.py.
+    nova = Contratacao(
+        exercicio=request.form.get('exercicio'),
+        objeto=request.form.get('objeto'),
+        descricao=request.form.get('descricao'),
+        valor_estimado=request.form.get('valor'),
+        dotacao=request.form.get('dotacao'),
+        data_planejada=datetime.strptime(request.form.get('data'), '%Y-%m-%d'),
+        secretaria_id=request.form.get('secretaria_id')
+    )
+    db.session.add(nova)
+    db.session.commit()
+    return redirect(url_for('home'))
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')

@@ -1,0 +1,57 @@
+# codigo inicial gerado pelo prompt, com erro na implementação da coluna de codigo
+
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, Date, ForeignKey, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from werkzeug.security import generate_password_hash, check_password_hash
+
+Base = declarative_base()
+
+class Secretaria(Base):
+    __tablename__ = 'secretarias'
+    
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(255), nullable=False)
+    
+    contratacoes = relationship('Contratacao', back_populates='secretaria')
+    usuarios = relationship('Usuario', back_populates='secretaria')
+
+class Usuario(Base):
+    __tablename__ = 'usuarios'
+    
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(255), nullable=False)
+    login = Column(String(100), unique=True, nullable=False)
+    senha = Column(String(255), nullable=False)
+    secretaria_id = Column(Integer, ForeignKey('secretarias.id'), nullable=False)
+    
+    secretaria = relationship('Secretaria', back_populates='usuarios')
+    
+    def set_password(self, password):
+        self.senha = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.senha, password)
+
+class Contratacao(Base):
+    __tablename__ = 'contratacoes'
+    
+    id = Column(Integer, primary_key=True)
+    exercicio = Column(Integer, nullable=False)
+    objeto = Column(String(500), nullable=False)
+    descricao = Column(Text)
+    valor_estimado = Column(Float)
+    dotacao = Column(String(100))
+    data_planejada = Column(Date)
+    secretaria_id = Column(Integer, ForeignKey('secretarias.id'), nullable=False)
+    codigo_identificador = Column(String(50), nullable=False, unique=True)
+    
+    secretaria = relationship('Secretaria', back_populates='contratacoes')
+    
+    def gerar_codigo_identificador(self):
+        self.codigo_identificador = f"PCA-{self.id}.{self.exercicio}-{self.secretaria_id}"
+
+# Configuração da conexão
+DATABASE_URL = "mysql+pymysql://user:password@localhost/database_name"
+engine = create_engine(DATABASE_URL)
+Base.metadata.create_all(engine)

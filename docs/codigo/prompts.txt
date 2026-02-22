@@ -1,0 +1,21 @@
+# PROMPT PARA O MODELS.PY
+"Gere o código para o models.py deste projeto. Use SQLAlchemy MySQL 9.1 para definir:
+Tabela Usuario: id, nome, login, senha (usando Werkzeug para hash), e secretaria.
+Tabela Secretaria: id e nome.
+Tabela Contratacao: id, exercicio (int), objeto (string), descricao (text), valor_estimado (float), dotacao (string), data_planejada (date) e secretaria_id (FK).
+Na tabela Contratacao, crie uma coluna chamada codigo_identificador. Importante: Use o recurso de Computed column (Generated Column) do MySQL para que esta coluna concatene automaticamente os campos: 'PCA-', id, '.', exercicio, '-', secretaria_id.
+Certifique-se de que essa coluna seja tratada como 'Virtual' ou 'Stored' para permitir indexação e buscas por texto simples pelo cidadão."
+
+# PROMPT PARA O APP.PY
+"Gere o código para o app.py usando Flask e integrando com o models.py.
+Configuração: Use os.environ.get('DB_HOST', 'localhost') para o banco MySQL, usuário 'root' e minha senha.
+Interface de Transparência (Pública):
+    Crie a rota principal / (Home) que permita a qualquer cidadão pesquisar e filtrar Contratações por Secretaria, Exercício ou pelo codigo_identificador.
+    Permita que o cidadão exporte o resultado da sua busca para PDF ou Excel.
+Interface Administrativa (Privada):
+    Crie rotas /admin/login e /admin/dashboard.
+    Na área logada, crie formulários para cadastrar Usuarios, Secretarias e as Contratações do PCA.
+Requisitos Técnicos:
+    Use as bibliotecas pandas e reportlab para as exportações.
+    Implemente um tratamento de erro robusto para falhas de conexão com o MySQL.
+    Comente as decisões de segurança, especialmente a separação entre a visualização pública e a gestão administrativa."

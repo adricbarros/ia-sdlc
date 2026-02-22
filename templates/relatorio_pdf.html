@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório PCA - {{ exercicio or 'Geral' }}</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <style>
+        /* Força A4 Paisagem e Margens */
+        @page { size: A4 landscape; margin: 12mm; }
+        body { background-color: white; font-size: 12px; }
+        
+        /* A MÁGICA DA REPETIÇÃO: Diz ao navegador para repetir a tag thead em todas as páginas */
+        thead { display: table-header-group; } 
+        tfoot { display: table-footer-group; }
+        tr { page-break-inside: avoid; }
+        
+        /* Cores aplicadas APENAS nos títulos das colunas, preservando o fundo branco da logo */
+        .titulos-colunas th { background-color: #24549c !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
+        
+        /* Esconde botões ao imprimir */
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body onload="window.print();">
+
+    <div class="container-fluid pt-2">
+        <table class="table table-bordered table-sm mt-3">
+            
+            <thead>
+                <tr>
+                    <th colspan="7" class="border-0 bg-white p-0">
+                        <div class="d-flex align-items-center mb-3 border-bottom pb-3">
+                            {% if ente and ente.logo_path %}
+                                <img src="{{ url_for('static', filename=ente.logo_path) }}" height="75" class="me-4">
+                            {% endif %}
+                            <div class="text-start">
+                                <h3 class="fw-bold mb-1" style="color: #24549c;">{{ ente.nome if ente else 'Órgão Público' }}</h3>
+                                <h5 class="mb-1 text-dark">Plano de Contratações Anual - Exercício {{ exercicio or 'Todos' }}</h5>
+                                <p class="mb-0 text-muted fw-bold">Escopo: {{ orgao_nome }}</p>
+                            </div>
+                            <div class="ms-auto text-end no-print">
+                                <a href="/" class="btn btn-secondary btn-sm shadow-sm">⬅ Voltar ao Sistema</a>
+                            </div>
+                        </div>
+                    </th>
+                </tr>
+                
+                <tr class="titulos-colunas align-middle">
+                    <th class="text-center" style="width: 12%;">Código</th>
+                    <th class="text-center" style="width: 8%;">Exercício</th>
+                    <th class="text-start" style="width: 15%;">Secretaria</th>
+                    <th class="text-start">Objeto</th>
+                    <th class="text-center" style="width: 10%;">Data Planejada</th>
+                    <th class="text-center" style="width: 12%;">Dotação</th>
+                    <th class="text-end" style="width: 12%;">Valor Estimado</th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% for c in contratacoes %}
+                <tr>
+                    <td class="fw-bold text-center align-middle">{{ c.codigo_identificador }}</td>
+                    <td class="text-center align-middle">{{ c.exercicio }}</td>
+                    <td class="text-start align-middle">{{ c.secretaria.nome }}</td>
+                    <td class="text-start align-middle">{{ c.objeto }}</td>
+                    <td class="text-center align-middle">{{ c.data_planejada.strftime('%d/%m/%Y') if c.data_planejada else '-' }}</td>
+                    <td class="text-center align-middle">{{ c.dotacao or '-' }}</td>
+                    <td class="text-end text-nowrap align-middle">R$ {{ c.valor_estimado | moeda_br }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center py-4">Nenhum registro encontrado para estes filtros.</td></tr>
+                {% endfor %}
+            </tbody>
+            
+            <tfoot>
+                <tr>
+                    <td colspan="7" class="border-0 text-end pt-3 text-muted" style="font-size: 10px;">
+                        Relatório gerado pelo Sistema PCA em: <strong class="text-dark">{{ data_hora_agora.strftime('%d/%m/%Y às %H:%M') }}</strong>
+                        <br>
+                        <em>Para exibir a numeração de páginas, certifique-se de habilitar "Cabeçalhos e rodapés" (Headers and footers) nas opções de impressão do seu navegador.</em>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</body>
+</html>

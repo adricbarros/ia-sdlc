@@ -1,0 +1,27 @@
+# Variáveis de Ambiente e Segredos
+.env
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Ambientes Virtuais (VITAL para não subir bibliotecas)
+venv/
+.venv/
+env/
+
+# Banco de Dados Local (Não queremos subir o banco de testes)
+*.sqlite
+*.sqlite3
+*.db
+instance/
+
+# Arquivos de Upload (Imagens e PDFs gerados nos testes)
+static/uploads/*
+!static/uploads/.gitkeep 
+
+# Pastas de IDE e SO (Opcional, mas recomendado)
+.vscode/
+.idea/
+.DS_Store

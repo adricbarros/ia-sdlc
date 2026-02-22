@@ -1,0 +1,18 @@
+Sim vamos para o passo 2, temos coisas importantes que passaram sem tratamento nos acessos:
+OK - Criar funcionalidades de alterar e excluir cadastros de contratações, usuarios e secretarias
+OK - Usuarios so podem cadastrar, alterar e excluir contratações de suas proprias secretarias
+OK - Tratar o logout dos usuarios no painel administrativo, é possivel fazer logout clicando no botao de   	"sair do painel"e voltar apenas digitando o endereço da pagina de administração
+OK - Timeout para sessão no painel administrativo de 5 minutos
+OK - Apenas o admin tem poderes para todas operações de CRUD de todos os modulos (contratações, usuarios e 		secretarias).
+OK - Apenas o admin tem acesso aos modulos de cadastro de usuarios e secretarias
+OK - funcionalidade para troca de senha para o usuario
+OK - funcionalidade para troca de senha para o admin
+- Cadastro do Ente principal do sistema (Prefeitura, Estado, Autarquia) com logotipo, endereço, contatos
+- Cabeçalho e Rodapé do site personalisado com dados do Ente (Logo, Nome)
+- Cabeçalhos dos relatórios em PDF e EXCEL
+
+TO DO LIST VERSÃO 1.1
+- Expiração de senha com alerta em cada logon durante os 5 ultimos dias até o bloqueio
+- Registro do usuario que fez a ultima alteração no registro de contratações
+
+

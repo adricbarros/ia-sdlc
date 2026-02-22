@@ -1,0 +1,55 @@
+# CODIGO CORRIGIDO PELO GEMINI PRO V 1.2
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Computed
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# Inicializa o SQLAlchemy sem atrelar a um app específico ainda (Design Pattern)
+db = SQLAlchemy()
+
+class Secretaria(db.Model):
+    __tablename__ = 'secretarias'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nome = db.Column(db.String(255), nullable=False, unique=True)
+    
+    contratacoes = db.relationship('Contratacao', back_populates='secretaria')
+    usuarios = db.relationship('Usuario', back_populates='secretaria')
+
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nome = db.Column(db.String(255), nullable=False)
+    login = db.Column(db.String(100), unique=True, nullable=False)
+    senha = db.Column(db.String(255), nullable=False)
+    secretaria_id = db.Column(db.Integer, db.ForeignKey('secretarias.id'), nullable=False)
+    
+    secretaria = db.relationship('Secretaria', back_populates='usuarios')
+    
+    def set_password(self, password):
+        self.senha = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.senha, password)
+
+class Contratacao(db.Model):
+    __tablename__ = 'contratacoes'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    exercicio = db.Column(db.Integer, nullable=False)
+    objeto = db.Column(db.String(500), nullable=False)
+    descricao = db.Column(db.Text)
+    valor_estimado = db.Column(db.Float)
+    dotacao = db.Column(db.String(100))
+    data_planejada = db.Column(db.Date)
+    secretaria_id = db.Column(db.Integer, db.ForeignKey('secretarias.id'), nullable=False)
+    
+    # A mágica do MySQL 9.1: A coluna é gerada no banco de dados, não no Python
+    codigo_identificador = db.Column(
+        db.String(100), 
+        Computed("CONCAT('PCA-', id, '.', exercicio, '-', secretaria_id)", persisted=True),
+        unique=True
+    )
+    
+    secretaria = db.relationship('Secretaria', back_populates='contratacoes')

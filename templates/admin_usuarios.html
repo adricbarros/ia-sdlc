@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Usuários - PCA</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/admin/dashboard">
+                {% if ente and ente.logo_path %}
+                    <img src="{{ url_for('static', filename=ente.logo_path) }}" height="40" class="me-2 rounded bg-white p-1">
+                {% endif %}
+                <span class="fw-bold">PCA - {{ ente.nome if ente else 'Prefeitura' }}</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">Contratações</a>
+                    </li>
+                    
+                    {% if session.get('user_login') == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/secretarias">Secretarias</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/usuarios">Usuários</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-bold" href="/admin/configuracoes">⚙️ Configurações</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                
+                <div class="d-flex">
+                    <span class="navbar-text me-3 text-light opacity-75">
+                        Olá, <strong>{{ session.get('user_login') }}</strong>
+                    </span>
+                    <a href="/admin/logout" class="btn btn-outline-danger btn-sm">Sair</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div id="alert-container" class="mb-3 position-relative" style="z-index: 1050;">
+                {% for message in messages %}
+                  
+                  {% set is_error = ('Erro' in message) or ('Acesso Negado' in message) or ('incorretos' in message) %}
+                  
+                  <div class="alert py-2 shadow-sm auto-dismiss d-flex align-items-center" 
+                       style="background-color: {{ 'rgba(220, 53, 69, 0.9)' if is_error else 'rgba(25, 135, 84, 0.85)' }}; 
+                              color: white; border: none; backdrop-filter: blur(4px);">
+                      
+                      <span class="me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                            style="width: 28px; height: 28px; border-radius: 50%; background-color: {{ '#ffc107' if is_error else '#fff' }}; color: {{ '#000' if is_error else '#198754' }};">
+                          {% if is_error %}
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+                                <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                                <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                              </svg>
+                          {% else %}
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                              </svg>
+                          {% endif %}
+                      </span>
+                      
+                      <span style="font-size: 0.95rem; font-weight: 500;">{{ message }}</span>
+                  </div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark fw-bold">Novo Usuário</div>
+                    <div class="card-body">
+                        <form method="POST" action="/admin/cadastrar/usuario">
+                            <div class="mb-2">
+                                <label class="form-label">Nome Completo</label>
+                                <input type="text" name="nome" class="form-control" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Login</label>
+                                <input type="text" name="login" class="form-control" required>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <label class="form-label">Senha</label>
+                                    <input type="password" name="senha" class="form-control" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Confirmar</label>
+                                    <input type="password" name="confirma_senha" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Vincular à Secretaria</label>
+                                <select name="secretaria_id" class="form-select" required>
+                                    <option value="" disabled selected>Selecione uma secretaria...</option>
+                                    {% for sec in secretarias %}
+                                    <option value="{{ sec.id }}">{{ sec.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 fw-bold">Cadastrar Usuário</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        
+                        <div class="table-responsive" style="max-height: 800px; overflow-y: auto;">                           
+                            <table class="table table-striped table-hover mb-0">
+                                <thead class="shadow-sm">
+                                    <tr class="align-middle">
+                                        <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Nome</th>
+                                        <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Login</th>
+                                        <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Secretaria Vinculada</th>
+                                        <th class="fw-bold border-bottom border-secondary text-center" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in usuarios %}
+                                    <tr>
+                                        <td class="align-middle">{{ u.nome }}</td>
+                                        <td class="align-middle">{{ u.login }}</td>
+                                        <td class="align-middle">{{ u.secretaria.nome }}</td>
+                                        <td class="text-center text-nowrap">
+                                            <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#modalEditarUser{{ u.id }}" title="Editar">✏️</button>
+                                            <button class="btn btn-sm btn-outline-warning py-0 px-2" data-bs-toggle="modal" data-bs-target="#modalSenhaUser{{ u.id }}" title="Mudar Senha">🔑</button>
+                                            
+                                            {% if u.id != session.get('user_id') %}
+                                                <button class="btn btn-sm btn-outline-danger py-0 px-2" data-bs-toggle="modal" data-bs-target="#modalExcluirUser{{ u.id }}" title="Excluir">🗑️</button>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Você não pode excluir a própria conta" disabled>🗑️</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            
+                        </div> </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.auto-dismiss');
+            alerts.forEach(function(alert) {
+                alert.style.transition = "opacity 0.6s ease-out";
+                alert.style.opacity = "0"; 
+                setTimeout(function() { alert.remove(); }, 600); 
+            });
+        }, 4000); 
+    </script>
+    <div class="modal fade" id="modalTrocaSenha" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-warning">
+            <h5 class="modal-title text-dark fw-bold">Alterar Minha Senha</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form method="POST" action="/admin/alterar-senha">
+              <div class="modal-body bg-light">
+                  <div class="mb-3">
+                      <label class="form-label fw-bold text-muted">Senha Atual</label>
+                      <input type="password" name="senha_atual" class="form-control" required>
+                  </div>
+                  <hr>
+                  <div class="mb-3">
+                      <label class="form-label fw-bold text-primary">Nova Senha</label>
+                      <input type="password" name="nova_senha" class="form-control" required minlength="6">
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label fw-bold text-primary">Confirmar Nova Senha</label>
+                      <input type="password" name="confirma_senha" class="form-control" required minlength="6">
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="submit" class="btn btn-warning fw-bold text-dark">Salvar Nova Senha</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+{% for u in usuarios %}
+    <div class="modal fade" id="modalEditarUser{{ u.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Editar Usuário</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/admin/editar/usuario/{{ u.id }}">
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Nome</label>
+                            <input type="text" name="nome" class="form-control" value="{{ u.nome }}" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Login</label>
+                            <input type="text" name="login" class="form-control" value="{{ u.login }}" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Secretaria</label>
+                            <select name="secretaria_id" class="form-select" required>
+                                {% for sec in secretarias %}
+                                <option value="{{ sec.id }}" {% if sec.id == u.secretaria_id %}selected{% endif %}>{{ sec.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalSenhaUser{{ u.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold">Redefinir Senha: {{ u.login }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/admin/resetar-senha/usuario/{{ u.id }}">
+                    <div class="modal-body">
+                        
+                        {% if u.id == session.get('user_id') %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-danger">Senha Atual (Obrigatório para sua conta)</label>
+                            <input type="password" name="senha_atual" class="form-control" required placeholder="Confirme sua identidade...">
+                        </div>
+                        <hr>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-primary">Nova Senha</label>
+                            <input type="password" name="nova_senha" class="form-control" required minlength="6">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-primary">Confirmar Nova Senha</label>
+                            <input type="password" name="confirma_senha" class="form-control" required minlength="6">
+                            
+                            {% if u.id != session.get('user_id') %}
+                            <small class="text-muted">A senha antiga não é necessária para redefinir senhas de terceiros.</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning fw-bold">Redefinir Senha</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalExcluirUser{{ u.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Deseja excluir permanentemente o usuário <strong>{{ u.login }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="/admin/excluir/usuario/{{ u.id }}">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Sim, Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>
