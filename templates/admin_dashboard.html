@@ -38,10 +38,15 @@
                     {% endif %}
                 </ul>
                 
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <span class="navbar-text me-3 text-light opacity-75">
                         Olá, <strong>{{ session.get('user_login') }}</strong>
                     </span>
+                    
+                    <button type="button" class="btn btn-outline-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalTrocaSenha" title="Alterar minha senha">
+                        🔑 Senha
+                    </button>
+
                     <a href="/admin/logout" class="btn btn-outline-danger btn-sm">Sair</a>
                 </div>
             </div>
