@@ -32,7 +32,11 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
           pip install gunicorn # Garante que o motor do site esteja presente
-
+      
+      - name: Ajustar Permissões para o usuário trap
+        run: |
+          sudo chown -R trap:trap .
+      
       - name: Reiniciar o serviço da aplicação
         run: |
           # Comando para o Linux carregar o código novo
