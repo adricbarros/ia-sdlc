@@ -3,23 +3,37 @@ name: CD - Deploy no Debian
 on:
   push:
     branches:
-      - main
+      - main # Gatilho: Só roda quando o código vai para a branch principal
 
 jobs:
   deploy:
     name: Atualizar Servidor e Reiniciar
-    runs-on: self-hosted
+    runs-on: self-hosted # Destino: O seu servidor Debian
     steps:
       - name: Puxar o código mais recente
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Baixa os arquivos do Git
 
-      - name: Atualizar dependências (se houver)
+      - name: Criar arquivo .env automaticamente
         run: |
-          # Ativa o ambiente virtual e instala pacotes novos
+          echo "FLASK_SECRET_KEY=${{ secrets.FLASK_SECRET_KEY }}" > .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
+      - name: Preparar Ambiente Virtual e Dependências
+        run: |
+          # Se a pasta venv não existir, cria ela
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          # Ativa o ambiente e instala tudo
           source venv/bin/activate
           pip install -r requirements.txt
+          pip install gunicorn # Garante que o motor do site esteja presente
 
       - name: Reiniciar o serviço da aplicação
         run: |
-          # Reinicia a aplicação para carregar o novo código
-          sudo systemctl restart ia-sdlc.service
+          # Comando para o Linux carregar o código novo
+          sudo /usr/bin/systemctl restart ia-sdlc.service
