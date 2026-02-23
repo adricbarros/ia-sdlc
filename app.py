@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'chave-padrao-desenvolvimento')
 
 # Cria a pasta estática de uploads se não existir
-UPLOAD_FOLDER = os.path.join('static', 'uploads')
+UPLOAD_FOLDER = os.path.join('static', 'img')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -571,7 +571,7 @@ def configuracoes_ente():
             filename = secure_filename(logo.filename)
             caminho_salvar = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             logo.save(caminho_salvar)
-            ente.logo_path = f"uploads/{filename}" # Salva o caminho relativo no banco
+            ente.logo_path = f"img/{filename}" # Salva o caminho relativo no banco
 
         db.session.commit()
         flash('Configurações do Órgão atualizadas com sucesso!')

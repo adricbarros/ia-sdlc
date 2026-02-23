@@ -17,10 +17,6 @@ env/
 *.db
 instance/
 
-# Arquivos de Upload (Imagens e PDFs gerados nos testes)
-static/uploads/*
-!static/uploads/.gitkeep 
-
 # Pastas de IDE e SO (Opcional, mas recomendado)
 .vscode/
 .idea/
