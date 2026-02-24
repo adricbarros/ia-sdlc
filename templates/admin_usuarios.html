@@ -94,7 +94,10 @@
                                 <label class="form-label">Login</label>
                                 <input type="text" name="login" class="form-control" required>
                             </div>
-                            
+                            <div class="mb-2">
+                                <label class="form-label">E-mail</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
                             <div class="row mb-2">
                                 <div class="col-6">
                                     <label class="form-label">Senha</label>
@@ -130,6 +133,7 @@
                                     <tr class="align-middle">
                                         <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Nome</th>
                                         <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Login</th>
+                                        <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">E-mail</th>
                                         <th class="fw-bold border-bottom border-secondary" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Secretaria Vinculada</th>
                                         <th class="fw-bold border-bottom border-secondary text-center" style="background-color: #d1d4d7 !important; color: #000 !important; padding: 12px 8px; position: sticky; top: 0; z-index: 10;">Ações</th>
                                     </tr>
@@ -139,6 +143,7 @@
                                     <tr>
                                         <td class="align-middle">{{ u.nome }}</td>
                                         <td class="align-middle">{{ u.login }}</td>
+                                        <td class="align-middle">{{ u.email or 'Sem e-mail' }}</td>
                                         <td class="align-middle">{{ u.secretaria.nome }}</td>
                                         <td class="text-center text-nowrap">
                                             <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#modalEditarUser{{ u.id }}" title="Editar">✏️</button>
@@ -220,6 +225,10 @@
                         <div class="mb-2">
                             <label class="form-label fw-bold">Login</label>
                             <input type="text" name="login" class="form-control" value="{{ u.login }}" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">E-mail</label>
+                            <input type="email" name="email" class="form-control" value="{{ u.email or '' }}" required>
                         </div>
                         <div class="mb-2">
                             <label class="form-label fw-bold">Secretaria</label>

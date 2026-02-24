@@ -1,19 +1,31 @@
-# Web Framework
+blinker==1.9.0
+chardet==5.2.0
+click==8.3.1
+colorama==0.4.6
+et_xmlfile==2.0.0
 Flask==3.0.3
-
-# Banco de Dados (Compatível com MySQL 9.1)
-mysql-connector-python==9.1.0
+Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
-pymysql==1.1.2
-
-# Geração de Relatórios e Manipulação de Dados
-pandas==2.2.2
+greenlet==3.3.2
+iniconfig==2.3.0
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mysql-connector-python==9.1.0
+numpy==2.4.2
 openpyxl==3.1.2
-reportlab==4.2.0
-Pillow==10.4.0
-
-# Ferramentas de Teste (Para o Eixo de Qualidade)
+packaging==26.0
+pandas==2.2.2
+pillow==12.1.1
+pluggy==1.6.0
+PyMySQL==1.1.2
 pytest==8.2.1
-
-#variaveis de ambinete
+python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
+pytz==2025.2
+reportlab==4.2.0
+six==1.17.0
+SQLAlchemy==2.0.46
+typing_extensions==4.15.0
+tzdata==2025.3
+Werkzeug==3.1.6

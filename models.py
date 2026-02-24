@@ -19,6 +19,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(255), nullable=False)
     login = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=True)
     senha = db.Column(db.String(255), nullable=False)
     secretaria_id = db.Column(db.Integer, db.ForeignKey('secretarias.id'), nullable=False)
     secretaria = db.relationship('Secretaria', back_populates='usuarios')

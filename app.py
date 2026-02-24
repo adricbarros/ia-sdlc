@@ -8,6 +8,8 @@ from models import db, Usuario, Secretaria, Contratacao, Ente
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 
 load_dotenv() # Carrega as variáveis do arquivo .env
 
@@ -26,6 +28,20 @@ DB_PASS = os.environ.get('DB_PASSWORD', '')
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_PORT = os.environ.get('DB_PORT', '3307')
 DB_NAME = os.environ.get('DB_NAME', 'pca_sdlc')
+
+# ============================================================================
+# CONFIGURAÇÃO DE E-MAIL (Flask-Mail)
+# ============================================================================
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+
+mail = Mail(app)
+# Gerador de tokens seguros usando a chave mestra da aplicação
+s = URLSafeTimedSerializer(app.secret_key)
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
@@ -265,6 +281,74 @@ def admin_logout():
     session.clear() # Limpa absolutamente tudo da sessão no backend
     return redirect(url_for('home'))
 
+@app.route('/admin/esqueci-senha', methods=['POST'])
+def esqueci_senha():
+    email = request.form.get('email')
+    usuario = Usuario.query.filter_by(email=email).first()
+    
+    if usuario:
+        # Gera um token com o e-mail do usuário embutido
+        token = s.dumps(usuario.email, salt='recuperacao-senha')
+        # Cria o link completo apontando para a nossa rota de reset
+        link = url_for('resetar_senha_token', token=token, _external=True)
+        
+        msg = Message('Recuperação de Senha - PCA', recipients=[email])
+        msg.body = f'''Olá {usuario.nome},
+
+Você solicitou a recuperação da sua senha no sistema PCA.
+Para redefinir sua credencial, clique no link abaixo:
+
+{link}
+
+Este link expira em 30 minutos.
+Se você não solicitou esta alteração, apenas ignore este e-mail.
+'''
+        try:
+            mail.send(msg)
+            flash('Se o e-mail estiver cadastrado, um link de recuperação será enviado. Verifique sua caixa de entrada e spam.')
+        except Exception as e:
+            flash('Erro interno ao tentar enviar o e-mail. Avise o suporte técnico.')
+            print(f"Erro SMTP: {e}")
+    else:
+        # Regra de Segurança: Nunca revele se o e-mail existe ou não na base de dados
+        flash('Se o e-mail estiver cadastrado, um link de recuperação será enviado. Verifique sua caixa de entrada e spam.')
+        
+    return redirect(url_for('admin_login'))
+
+@app.route('/admin/resetar/<token>', methods=['GET', 'POST'])
+def resetar_senha_token(token):
+    try:
+        # Tenta extrair o e-mail do token e verifica se passou de 30 min (1800 segundos)
+        email = s.loads(token, salt='recuperacao-senha', max_age=1800)
+    except SignatureExpired:
+        flash('Erro: O link de recuperação expirou. Solicite um novo na tela de login.')
+        return redirect(url_for('admin_login'))
+    except BadTimeSignature:
+        flash('Erro: Link de recuperação inválido ou corrompido.')
+        return redirect(url_for('admin_login'))
+
+    usuario = Usuario.query.filter_by(email=email).first()
+    if not usuario:
+        flash('Erro: Usuário não encontrado no sistema.')
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        nova_senha = request.form.get('nova_senha')
+        confirma_senha = request.form.get('confirma_senha')
+
+        if nova_senha != confirma_senha:
+            flash('Erro: As senhas digitadas não conferem.')
+            return render_template('resetar_senha.html', token=token)
+
+        # Salva a nova senha e encerra
+        usuario.set_password(nova_senha)
+        db.session.commit()
+        flash('Sua senha foi redefinida com sucesso! Você já pode acessar o sistema.')
+        return redirect(url_for('admin_login'))
+
+    # Se for GET, mostra a telinha para digitar a nova senha
+    return render_template('resetar_senha.html', token=token)
+
 @app.route('/admin/dashboard', methods=['GET'])
 def admin_dashboard():
     if 'user_id' not in session: return redirect(url_for('admin_login'))
@@ -487,7 +571,8 @@ def cadastrar_usuario():
     login = request.form.get('login')
     senha = request.form.get('senha')
     confirma_senha = request.form.get('confirma_senha')
-    
+    email = request.form.get('email')
+
     # 1. Verifica se as senhas conferem
     if senha != confirma_senha:
         flash('Erro: As senhas digitadas não conferem. Tente novamente.')
@@ -498,11 +583,19 @@ def cadastrar_usuario():
     if usuario_existente:
         flash(f'Erro: O login "{login}" já está em uso. Escolha um login diferente.')
         return redirect(url_for('gerenciar_usuarios'))
-        
+
+    # 3. Verifica se o e-mail já existe (Prevenção de erro UNIQUE) <--- NOVO
+    if email:
+        email_existente = Usuario.query.filter_by(email=email).first()
+        if email_existente:
+            flash(f'Erro: O e-mail "{email}" já está cadastrado para outro usuário.')
+            return redirect(url_for('gerenciar_usuarios'))
+
     try:
         novo_user = Usuario(
             nome=request.form.get('nome'),
             login=login,
+            email=email,
             secretaria_id=int(request.form.get('secretaria_id'))
         )
         novo_user.set_password(senha)
@@ -619,11 +712,28 @@ def editar_usuario(id):
         return redirect(url_for('admin_dashboard'))
 
     usuario = Usuario.query.get_or_404(id)
-    usuario.nome = request.form.get('nome')
-    usuario.login = request.form.get('login')
-    usuario.secretaria_id = int(request.form.get('secretaria_id'))
-    db.session.commit()
-    flash('Usuário atualizado com sucesso!')
+    novo_email = request.form.get('email') # <--- CAPTURANDO O E-MAIL
+
+    # Validação: se o e-mail mudou, verificar se o novo já existe no banco <--- NOVO
+    if novo_email and novo_email != usuario.email:
+        email_existente = Usuario.query.filter_by(email=novo_email).first()
+        if email_existente:
+            flash(f'Erro: O e-mail "{novo_email}" já está sendo usado por outro usuário.')
+            return redirect(url_for('gerenciar_usuarios'))
+
+    try:
+        usuario.nome = request.form.get('nome')
+        usuario.login = request.form.get('login')
+        usuario.email = novo_email # <--- ATUALIZANDO O DADO
+        usuario.secretaria_id = int(request.form.get('secretaria_id'))
+        
+        db.session.commit()
+        flash('Usuário atualizado com sucesso!')
+    except Exception as e:
+        db.session.rollback()
+        flash('Erro interno ao atualizar usuário.')
+        print(f"Erro real do DB (Edição de Usuário): {str(e)}")
+
     return redirect(url_for('gerenciar_usuarios'))
 
 @app.route('/admin/excluir/usuario/<int:id>', methods=['POST'])
