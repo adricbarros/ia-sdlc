@@ -1,4 +1,4 @@
-name: CD - Deploy no Debian
+name: CD - Deploy em produção
 
 on:
   # Gatilho Inteligente: Só liga quando a esteira "CI" terminar

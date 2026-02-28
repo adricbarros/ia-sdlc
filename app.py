@@ -382,7 +382,7 @@ def cadastrar_contratacao():
     user_sec_id = session.get('secretaria_id')
     form_sec_id = int(request.form.get('secretaria_id'))
     
-    # VALIDAÇÃO DE SEGURANÇA BACKEND (RBAC)
+    # VALIDAÇÃO DE SEGURANÇA BACKEND (RBAC)tes
     # Se não for o admin, e tentar mandar para outra secretaria, a gente bloqueia!
     if user_login != 'admin' and form_sec_id != user_sec_id:
         flash('Erro de Segurança: Você só pode cadastrar itens para a sua própria secretaria.')
