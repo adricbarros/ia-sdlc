@@ -15,12 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v4
+        # Usando o Hash seguro para a action checkout v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0  
 
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        # Usando o Hash seguro para a action setup-python v4.7.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c
         with:
           python-version: '3.11.9' 
 
@@ -34,12 +36,11 @@ jobs:
           pytest --cov=. --cov-report=xml
 
       - name: Análise Estática com SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        # Usando o Hash seguro do SonarQube Scan Action
+        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
         with:
-          # A TRAVA DE SEGURANÇA: Força o CI a esperar a resposta do Quality Gate.
-          # Se o Sonar falhar, a esteira quebra aqui.
           args: >
             -Dsonar.qualitygate.wait=true

@@ -18,18 +18,32 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Criar arquivo .env automaticamente
+        # 1. Declaramos os segredos de forma segura aqui:
+        env:
+          ENV_FLASK_SECRET_KEY: ${{ secrets.FLASK_SECRET_KEY }}
+          ENV_DB_USER: ${{ secrets.DB_USER }}
+          ENV_DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ENV_DB_HOST: ${{ secrets.DB_HOST }}
+          ENV_DB_PORT: ${{ secrets.DB_PORT }}
+          ENV_DB_NAME: ${{ secrets.DB_NAME }}
+          ENV_MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          ENV_MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          ENV_MAIL_USE_TLS: ${{ secrets.MAIL_USE_TLS }}
+          ENV_MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          ENV_MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        # 2. Lemos de forma nativa no bash usando o '$'
         run: |
-          echo "FLASK_SECRET_KEY=${{ secrets.FLASK_SECRET_KEY }}" > .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "MAIL_SERVER=${{ secrets.MAIL_SERVER }}" >> .env
-          echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env
-          echo "MAIL_USE_TLS=${{ secrets.MAIL_USE_TLS }}" >> .env
-          echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> .env
-          echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> .env
+          echo "FLASK_SECRET_KEY=$ENV_FLASK_SECRET_KEY" > .env
+          echo "DB_USER=$ENV_DB_USER" >> .env
+          echo "DB_PASSWORD=$ENV_DB_PASSWORD" >> .env
+          echo "DB_HOST=$ENV_DB_HOST" >> .env
+          echo "DB_PORT=$ENV_DB_PORT" >> .env
+          echo "DB_NAME=$ENV_DB_NAME" >> .env
+          echo "MAIL_SERVER=$ENV_MAIL_SERVER" >> .env
+          echo "MAIL_PORT=$ENV_MAIL_PORT" >> .env
+          echo "MAIL_USE_TLS=$ENV_MAIL_USE_TLS" >> .env
+          echo "MAIL_USERNAME=$ENV_MAIL_USERNAME" >> .env
+          echo "MAIL_PASSWORD=$ENV_MAIL_PASSWORD" >> .env
 
       - name: Preparar Ambiente Virtual e Dependências
         run: |
