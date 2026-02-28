@@ -42,6 +42,13 @@ jobs:
         run: |
           sudo chown -R trap:trap .
       
+      # Quality Gate
+      - name: Verificar Quality Gate do SonarCloud
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: Reiniciar o serviço da aplicação
         run: |
           # Comando para o Linux carregar o código novo
