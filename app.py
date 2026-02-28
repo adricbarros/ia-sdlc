@@ -29,6 +29,16 @@ DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_PORT = os.environ.get('DB_PORT', '3307')
 DB_NAME = os.environ.get('DB_NAME', 'pca_sdlc')
 
+# ---> SEPARAÇÃO DE AMBIENTES <---
+if os.environ.get('AMBIENTE_DE_TESTE') == 'True':
+    # Se estiver rodando teste, usa o banco temporário na memória RAM
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    # Se for o mundo real (Produção/Local), usa o MySQL oficial
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # ============================================================================
 # CONFIGURAÇÃO DE E-MAIL (Flask-Mail)
 # ============================================================================

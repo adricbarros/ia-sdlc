@@ -1,3 +1,7 @@
+import os
+# Avisa o sistema que estamos em modo de teste ANTES de carregar a aplicação
+os.environ['AMBIENTE_DE_TESTE'] = 'True'
+
 import pytest
 from app import app, db, Ente, Secretaria
 
@@ -5,7 +9,7 @@ from app import app, db, Ente, Secretaria
 def client():
     # Configura o Flask para modo de teste e usa um banco em memória
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['WTF_CSRF_ENABLED'] = False
 
     with app.test_client() as client:
