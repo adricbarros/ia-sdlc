@@ -14,11 +14,9 @@ def client():
     with app.test_client() as client:
         with app.app_context():
             # --- TRAVA DE SEGURANÇA (KILL SWITCH) ---
-            # Se a string de conexão não for SQLite, paralisa o teste na hora!
             if 'sqlite' not in app.config['SQLALCHEMY_DATABASE_URI']:
                 raise RuntimeError("⚠️ ALERTA DE SEGURANÇA: O teste tentou conectar em um banco real. Abortando!")
             
-            # Se passou pela trava, estamos na RAM. Pode criar as tabelas.
             db.create_all()
             
             # Cria dados básicos simulados para a tela carregar sem erro
@@ -30,9 +28,11 @@ def client():
             
             yield client
             
-            # Limpa a sessão, mas NÃO usamos db.drop_all(). 
-            # O banco em memória se autodestrói ao fechar a conexão.
             db.session.remove()
+            # Limpa o banco para que o próximo teste comece do zero.
+            # A trava do IF garante que isso NUNCA rodará no MySQL.
+            if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
+                db.drop_all()
 
 def test_home_page_carrega_com_sucesso(client):
     """Testa se a página pública (Portal) está online (Status 200)"""
