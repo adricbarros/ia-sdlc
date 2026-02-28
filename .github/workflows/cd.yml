@@ -1,17 +1,21 @@
 name: CD - Deploy no Debian
 
 on:
-  push:
-    branches:
-      - main # Gatilho: Só roda quando o código vai para a branch principal
+  # Gatilho Inteligente: Só liga quando a esteira "CI" terminar
+  workflow_run:
+    workflows: ["CI - Code Quality & Security"]
+    types:
+      - completed
 
 jobs:
   deploy:
     name: Atualizar Servidor e Reiniciar
-    runs-on: self-hosted # Destino: O seu servidor Debian
+    runs-on: self-hosted
+    # Trava de Segurança Final: Só roda se o CI passou (ficou verde)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Puxar o código mais recente
-        uses: actions/checkout@v4 # Baixa os arquivos do Git
+        uses: actions/checkout@v4
 
       - name: Criar arquivo .env automaticamente
         run: |
@@ -29,27 +33,17 @@ jobs:
 
       - name: Preparar Ambiente Virtual e Dependências
         run: |
-          # Se a pasta venv não existir, cria ela
           if [ ! -d "venv" ]; then
             python3 -m venv venv
           fi
-          # Ativa o ambiente e instala tudo
           source venv/bin/activate
           pip install -r requirements.txt
-          pip install gunicorn # Garante que o motor do site esteja presente
+          pip install gunicorn
       
       - name: Ajustar Permissões para o usuário trap
         run: |
           sudo chown -R trap:trap .
       
-      # Quality Gate
-      - name: Verificar Quality Gate do SonarCloud
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
       - name: Reiniciar o serviço da aplicação
         run: |
-          # Comando para o Linux carregar o código novo
           sudo /usr/bin/systemctl restart ia-sdlc.service
