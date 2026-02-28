@@ -29,7 +29,7 @@ DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_PORT = os.environ.get('DB_PORT', '3307')
 DB_NAME = os.environ.get('DB_NAME', 'pca_sdlc')
 
-# A MÁGICA: Forçamos a verificação da variável de ambiente ANTES de montar a string do MySQL
+# A MÁGICA: Forçamos a verificação da variável de ambiente
 if os.environ.get('AMBIENTE_DE_TESTE') == 'True' or os.environ.get('CI') == 'true':
     # Usa banco em memória (SQLite) para testes locais ou no GitHub Actions
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
@@ -38,6 +38,7 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
 # ============================================================================
 # CONFIGURAÇÃO DE E-MAIL (Flask-Mail)
@@ -52,11 +53,6 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
 mail = Mail(app)
 # Gerador de tokens seguros usando a chave mestra da aplicação
 s = URLSafeTimedSerializer(app.secret_key)
-
-#app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Vincula o banco de dados à aplicação Flask
 db.init_app(app)
