@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necessário para o SonarCloud analisar o histórico completo
+          fetch-depth: 0  
 
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11.9' # Ou a versão que você usou no MVP
+          python-version: '3.11.9' 
 
       - name: Instalar dependencias e rodar os testes
         env:
@@ -34,7 +34,12 @@ jobs:
           pytest --cov=. --cov-report=xml
 
       - name: Análise Estática com SonarCloud
-        uses: SonarSource/sonarqube-scan-action@master
+        uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # O GitHub gera esse token sozinho
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # O token que você salvou no passo 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
+        with:
+          # A TRAVA DE SEGURANÇA: Força o CI a esperar a resposta do Quality Gate.
+          # Se o Sonar falhar, a esteira quebra aqui.
+          args: >
+            -Dsonar.qualitygate.wait=true

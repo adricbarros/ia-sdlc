@@ -94,6 +94,9 @@
                     </div>
                     <div class="card-body">
                         <form method="POST" action="/admin/cadastrar/contratacao">
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                             <div class="mb-2">
                                 <label class="form-label fw-bold">Secretaria Demandante</label>
                                 <select name="secretaria_id" class="form-select" required>
@@ -204,6 +207,9 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST" action="/admin/editar/contratacao/{{ c.id }}">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                     <div class="modal-body">
                         <div class="row mb-2">
                             <div class="col-md-6">
@@ -273,6 +279,9 @@
                 </div>
                 <div class="modal-footer">
                     <form method="POST" action="/admin/excluir/contratacao/{{ c.id }}">
+                        
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger">Sim, Excluir</button>
                     </form>
@@ -290,7 +299,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form method="POST" action="/admin/alterar-senha">
-              <div class="modal-body bg-light">
+
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+                <div class="modal-body bg-light">
                   <div class="mb-3">
                       <label class="form-label fw-bold text-muted">Senha Atual</label>
                       <input type="password" name="senha_atual" class="form-control" required>

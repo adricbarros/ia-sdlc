@@ -43,6 +43,9 @@
             </div>
             <div class="card-body">
                 <form method="POST" action="/admin/configuracoes" enctype="multipart/form-data">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                     <div class="mb-3 text-center">
                         {% if ente and ente.logo_path %}
                             <img src="{{ url_for('static', filename=ente.logo_path) }}" alt="Logo" class="img-thumbnail mb-2" style="max-height: 120px;">

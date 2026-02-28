@@ -9,6 +9,8 @@
     <main class="form-signin w-100 m-auto" style="max-width: 330px;">
         <form method="POST" action="/admin/login">
             
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
             {% with messages = get_flashed_messages() %}
               {% if messages %}
                 <div id="alert-container" class="mb-3">
@@ -65,6 +67,9 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST" action="/admin/esqueci-senha">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                     <div class="modal-body bg-light">
                         <p class="small text-muted mb-3">
                             Digite o e-mail cadastrado na sua conta. Nós enviaremos um link seguro para você redefinir sua senha.

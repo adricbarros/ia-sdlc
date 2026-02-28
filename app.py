@@ -10,10 +10,12 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from flask_wtf.csrf import CSRFProtect
 
 load_dotenv() # Carrega as variáveis do arquivo .env
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
 

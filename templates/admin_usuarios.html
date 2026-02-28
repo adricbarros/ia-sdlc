@@ -86,6 +86,9 @@
                     <div class="card-header bg-warning text-dark fw-bold">Novo Usuário</div>
                     <div class="card-body">
                         <form method="POST" action="/admin/cadastrar/usuario">
+
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                             <div class="mb-2">
                                 <label class="form-label">Nome Completo</label>
                                 <input type="text" name="nome" class="form-control" required>
@@ -184,6 +187,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form method="POST" action="/admin/alterar-senha">
+
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
               <div class="modal-body bg-light">
                   <div class="mb-3">
                       <label class="form-label fw-bold text-muted">Senha Atual</label>
@@ -217,6 +223,9 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="/admin/editar/usuario/{{ u.id }}">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
                     <div class="modal-body">
                         <div class="mb-2">
                             <label class="form-label fw-bold">Nome</label>
@@ -256,6 +265,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST" action="/admin/resetar-senha/usuario/{{ u.id }}">
+
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
                     <div class="modal-body">
                         
                         {% if u.id == session.get('user_id') %}
@@ -300,6 +312,7 @@
                 </div>
                 <div class="modal-footer">
                     <form method="POST" action="/admin/excluir/usuario/{{ u.id }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/> 
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger">Sim, Excluir</button>
                     </form>
