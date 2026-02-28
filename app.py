@@ -15,7 +15,7 @@ load_dotenv() # Carrega as variáveis do arquivo .env
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'chave-padrao-desenvolvimento')
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', os.urandom(24).hex())
 
 # Cria a pasta estática de uploads se não existir
 UPLOAD_FOLDER = os.path.join('static', 'img')
@@ -827,4 +827,4 @@ if __name__ == '__main__':
             print("Bootstrapping concluído: Secretaria Padrão e Usuário Admin criados.")
 
     # Inicia o servidor Flask
-    app.run(debug=True, host='127.0.0.1', port=5555)
+    app.run(debug=os.environ.get('FLASK_DEBUG') == 'True', host='127.0.0.1', port=5555)
