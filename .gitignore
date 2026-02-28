@@ -25,3 +25,7 @@ instance/
 # Arquivos de estudo e backup
 docs/
 resgate.py
+
+# Arquivos de Teste e Cobertura
+coverage.xml
+.pytest_cache/
