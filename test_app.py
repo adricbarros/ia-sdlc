@@ -27,7 +27,7 @@ def client():
             
             # Cria um usuário falso na memória para testarmos o Login
             senha_hasheada = generate_password_hash("senha_segura_123")
-            usuario_teste = Usuario(nome="Admin Teste", email="admin@teste.com", senha=senha_hasheada)
+            usuario_teste = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada)
             
             db.session.add_all([ente_teste, sec_teste, usuario_teste])
             db.session.commit()
@@ -62,7 +62,7 @@ def test_login_page_carrega_com_sucesso(client):
 def test_login_falha_com_senha_incorreta(client):
     """Testa o envio (POST) de formulário com dados errados"""
     resposta = client.post('/admin/login', data={
-        'email': 'admin@teste.com',
+        'login': 'admin',
         'senha': 'senha_errada_aqui'
     }, follow_redirects=True) # Segue o redirecionamento caso o Flask recarregue a página
     
@@ -74,7 +74,7 @@ def test_login_falha_com_senha_incorreta(client):
 def test_login_sucesso_com_credenciais_corretas(client):
     """Testa o envio (POST) de formulário com o usuário criado na fixture"""
     resposta = client.post('/admin/login', data={
-        'email': 'admin@teste.com',
+        'login': 'admin',
         'senha': 'senha_segura_123'
     }, follow_redirects=True)
     
