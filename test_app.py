@@ -7,13 +7,18 @@ from app import app, db, Ente, Secretaria
 
 @pytest.fixture
 def client():
-    # Configura o Flask para modo de teste e usa um banco em memória
+    # Configura o Flask para modo de teste
     app.config['TESTING'] = True
-    #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['WTF_CSRF_ENABLED'] = False
 
     with app.test_client() as client:
         with app.app_context():
+            # --- TRAVA DE SEGURANÇA (KILL SWITCH) ---
+            # Se a string de conexão não for SQLite, paralisa o teste na hora!
+            if 'sqlite' not in app.config['SQLALCHEMY_DATABASE_URI']:
+                raise RuntimeError("⚠️ ALERTA DE SEGURANÇA: O teste tentou conectar em um banco real. Abortando!")
+            
+            # Se passou pela trava, estamos na RAM. Pode criar as tabelas.
             db.create_all()
             
             # Cria dados básicos simulados para a tela carregar sem erro
@@ -25,14 +30,15 @@ def client():
             
             yield client
             
+            # Limpa a sessão, mas NÃO usamos db.drop_all(). 
+            # O banco em memória se autodestrói ao fechar a conexão.
             db.session.remove()
-            db.drop_all()
 
 def test_home_page_carrega_com_sucesso(client):
     """Testa se a página pública (Portal) está online (Status 200)"""
     resposta = client.get('/')
     assert resposta.status_code == 200
-    assert b"PCA" in resposta.data # Verifica se a sigla aparece no HTML
+    assert b"PCA" in resposta.data
 
 def test_login_page_carrega_com_sucesso(client):
     """Testa se a tela de login administrativo está acessível"""
