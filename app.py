@@ -814,7 +814,13 @@ if __name__ == '__main__':
                 login='admin',
                 secretaria_id=sec_padrao.id
             )
-            novo_admin.set_password('admin123') # Usa a função de hash segura do models.py!
+
+            # Puxa a senha do .env (Se não existir lá, usa uma senha aleatória gerada na hora para não travar)
+            import secrets
+            senha_inicial = os.environ.get('ADMIN_DEFAULT_PASSWORD', secrets.token_hex(8))
+            novo_admin.set_password(senha_inicial)
+
+            #novo_admin.set_password('admin123') # Usa a função de hash segura do models.py!
             
             db.session.add(novo_admin)
             db.session.commit()
