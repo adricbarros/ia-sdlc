@@ -21,15 +21,23 @@ def client():
             
             db.create_all()
             
-            # Cria dados básicos simulados para a tela carregar sem erro
+            # 1. Cria e SALVA a Secretaria e o Ente primeiro para gerarem um ID
             ente_teste = Ente(nome="Prefeitura Teste")
             sec_teste = Secretaria(nome="Secretaria de Teste")
+            db.session.add_all([ente_teste, sec_teste])
+            db.session.commit() # Agora sec_teste.id existe!
             
-            # Cria um usuário falso na memória para testarmos o Login
+            # 2. Cria o usuário falso vinculando-o à Secretaria recém-criada
             senha_hasheada = generate_password_hash("senha_segura_123")
-            usuario_teste = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada)
+            usuario_teste = Usuario(
+                nome="Admin Teste", 
+                login="admin", 
+                email="admin@teste.com", 
+                senha=senha_hasheada,
+                secretaria_id=sec_teste.id # <--- O VÍNCULO ACONTECE AQUI
+            )
             
-            db.session.add_all([ente_teste, sec_teste, usuario_teste])
+            db.session.add(usuario_teste)
             db.session.commit()
             
             yield client
