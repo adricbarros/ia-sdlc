@@ -36,7 +36,8 @@ jobs:
           pytest --cov=. --cov-report=xml
 
       - name: Análise Estática com SonarCloud
-        uses: SonarSource/sonarqube-scan-action@master
+        # Este é o Hash da versão v5.0.0 da Action, que já possui o Java 21 embutido!
+        uses: SonarSource/sonarqube-scan-action@512903cefb7512140b9ea595c2a1c2212f3bc852
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
