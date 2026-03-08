@@ -29,4 +29,5 @@ resgate.py
 
 # Arquivos de Teste e Cobertura
 coverage.xml
+.coverage
 .pytest_cache/

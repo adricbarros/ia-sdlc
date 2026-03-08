@@ -6,10 +6,12 @@ __pycache__/
 # Arquivos de ambiente (Escondendo os segredos)
 .env
 .env.docker
+.env.example
 
 # Git e GitHub Actions
 .git/
 .github/
+.gitignore
 
 # Testes e Qualidade de Código (Não vão para produção)
 .coverage
@@ -20,3 +22,8 @@ sonar-project.properties
 # Scripts locais e Docs
 docs/
 resgate.py
+
+# Arquivos do próprio Docker (O contêiner não precisa orquestrar a si mesmo)
+Dockerfile
+docker-compose.yml
+.dockerignore
