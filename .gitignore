@@ -1,5 +1,6 @@
 # Variáveis de Ambiente e Segredos
 .env
+.env.docker
 
 # Cache do Python
 __pycache__/

@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    container_name: pcaweb_app
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: pcaweb_mysql
+    restart: always
+    ports:
+      - "3308:3306"
+    env_file:
+      - .env.docker
+    healthcheck:
+      # O Docker fará um "ping" no MySQL. Se ele não responder, significa que ainda está ligando.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost || exit 1"]
+      interval: 10s   # Tenta a cada 10 segundos
+      timeout: 5s     # Espera 5 segundos pela resposta
+      retries: 5      # Desiste se falhar 5 vezes seguidas
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

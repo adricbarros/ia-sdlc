@@ -1,0 +1,22 @@
+# Pastas de ambiente e cache
+venv/
+__pycache__/
+.pytest_cache/
+
+# Arquivos de ambiente (Escondendo os segredos)
+.env
+.env.docker
+
+# Git e GitHub Actions
+.git/
+.github/
+
+# Testes e Qualidade de Código (Não vão para produção)
+.coverage
+coverage.xml
+test_app.py
+sonar-project.properties
+
+# Scripts locais e Docs
+docs/
+resgate.py

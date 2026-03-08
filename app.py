@@ -59,6 +59,40 @@ s = URLSafeTimedSerializer(app.secret_key)
 # Vincula o banco de dados à aplicação Flask
 db.init_app(app)
 
+# ============================================================================
+# BOOTSTRAP: CRIAÇÃO AUTOMÁTICA DE BANCO E ADMIN (Roda no Gunicorn e no Local)
+# ============================================================================
+with app.app_context():
+        # 1. Cria todas as tabelas no MySQL baseadas no models.py
+        db.create_all()
+        
+        # 2. Verifica se existe pelo menos uma Secretaria (Obrigatório para o FK)
+        sec_padrao = Secretaria.query.filter_by(nome='Secretaria de Administração').first()
+        if not sec_padrao:
+            sec_padrao = Secretaria(nome='Secretaria de Administração')
+            db.session.add(sec_padrao)
+            db.session.commit() # Commitamos aqui para gerar o ID da secretaria
+            
+        # 3. Verifica se o usuário 'admin' existe, se não, cria.
+        admin_user = Usuario.query.filter_by(login='admin').first()
+        if not admin_user:
+            novo_admin = Usuario(
+                nome='Administrador do Sistema',
+                login='admin',
+                secretaria_id=sec_padrao.id
+            )
+
+            # Puxa a senha do .env (Se não existir lá, usa uma senha aleatória gerada na hora para não travar)
+            import secrets
+            senha_inicial = os.environ.get('ADMIN_DEFAULT_PASSWORD', secrets.token_hex(8))
+            novo_admin.set_password(senha_inicial)
+
+            #novo_admin.set_password('admin123') # Usa a função de hash segura do models.py!
+            
+            db.session.add(novo_admin)
+            db.session.commit()
+            print("Bootstrapping concluído: Secretaria Padrão e Usuário Admin criados.")
+
 # Injeta os dados do Ente e a data da última contratação em TODOS os arquivos HTML
 # Injeta os dados do Ente, data e o ano atual em TODOS os arquivos HTML
 # Injeta os dados Globais em TODOS os arquivos HTML
@@ -797,36 +831,5 @@ def resetar_senha_usuario(id):
     return redirect(url_for('gerenciar_usuarios'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        # 1. Cria todas as tabelas no MySQL baseadas no models.py
-        db.create_all()
-        
-        # 2. Verifica se existe pelo menos uma Secretaria (Obrigatório para o FK)
-        sec_padrao = Secretaria.query.filter_by(nome='Secretaria de Administração').first()
-        if not sec_padrao:
-            sec_padrao = Secretaria(nome='Secretaria de Administração')
-            db.session.add(sec_padrao)
-            db.session.commit() # Commitamos aqui para gerar o ID da secretaria
-            
-        # 3. Verifica se o usuário 'admin' existe, se não, cria.
-        admin_user = Usuario.query.filter_by(login='admin').first()
-        if not admin_user:
-            novo_admin = Usuario(
-                nome='Administrador do Sistema',
-                login='admin',
-                secretaria_id=sec_padrao.id
-            )
-
-            # Puxa a senha do .env (Se não existir lá, usa uma senha aleatória gerada na hora para não travar)
-            import secrets
-            senha_inicial = os.environ.get('ADMIN_DEFAULT_PASSWORD', secrets.token_hex(8))
-            novo_admin.set_password(senha_inicial)
-
-            #novo_admin.set_password('admin123') # Usa a função de hash segura do models.py!
-            
-            db.session.add(novo_admin)
-            db.session.commit()
-            print("Bootstrapping concluído: Secretaria Padrão e Usuário Admin criados.")
-
     # Inicia o servidor Flask
     app.run(debug=os.environ.get('FLASK_DEBUG') == 'True', host='127.0.0.1', port=5555)
