@@ -18,33 +18,32 @@ def client():
             if 'sqlite' not in app.config['SQLALCHEMY_DATABASE_URI']:
                 raise RuntimeError("⚠️ ALERTA DE SEGURANÇA: O teste tentou conectar em um banco real. Abortando!")
             
+            # --- A SOLUÇÃO DEFINITIVA ---
+            # Apaga o "admin" que o app.py criou na memória e cria uma base limpa só para o teste
+            db.drop_all()
             db.create_all()
             
-            # --- A SOLUÇÃO: Verifica se os dados já existem na memória antes de criar ---
-            if not Secretaria.query.filter_by(nome="Secretaria de Teste").first():
-                # 1. Cria a Secretaria e o Ente
-                ente_teste = Ente(nome="Prefeitura Teste")
-                sec_teste = Secretaria(nome="Secretaria de Teste")
-                db.session.add_all([ente_teste, sec_teste])
-                db.session.commit() 
-                
-                # 2. Cria os Usuários (Admin e Comum)
-                senha_hasheada = generate_password_hash("senha_segura_123")
-                usuario_admin = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
-                usuario_comum = Usuario(nome="Comum Teste", login="comum", email="comum@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
-                
-                # 3. Cria uma Contratação prévia
-                contratacao_teste = Contratacao(exercicio=2026, objeto="Notebooks", descricao="TI", valor_estimado=5000.00, dotacao="123", data_planejada=date(2026, 1, 1), secretaria_id=sec_teste.id)
-                
-                db.session.add_all([usuario_admin, usuario_comum, contratacao_teste])
-                db.session.commit()
+            # 1. Cria a Secretaria e o Ente
+            ente_teste = Ente(nome="Prefeitura Teste")
+            sec_teste = Secretaria(nome="Secretaria de Teste")
+            db.session.add_all([ente_teste, sec_teste])
+            db.session.commit() 
+            
+            # 2. Cria os Usuários (Admin e Comum)
+            senha_hasheada = generate_password_hash("senha_segura_123")
+            usuario_admin = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
+            usuario_comum = Usuario(nome="Comum Teste", login="comum", email="comum@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
+            
+            # 3. Cria uma Contratação prévia
+            contratacao_teste = Contratacao(exercicio=2026, objeto="Notebooks", descricao="TI", valor_estimado=5000.00, dotacao="123", data_planejada=date(2026, 1, 1), secretaria_id=sec_teste.id)
+            
+            db.session.add_all([usuario_admin, usuario_comum, contratacao_teste])
+            db.session.commit()
             
             yield client
             
+            # Limpa a sessão após o teste
             db.session.remove()
-            # Mantido o código original do seu arquivo para limpeza da memória
-            if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
-                db.drop_all()
 
 # --- BLOCOS DE 1 A 10 (MANTIDOS E FUNCIONANDO) ---
 
