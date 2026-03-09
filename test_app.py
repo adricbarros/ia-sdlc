@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash
 from app import app, db, Ente, Secretaria, Usuario, Contratacao, formatar_moeda
 
 @pytest.fixture
-@pytest.fixture
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False 
