@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 from app import app, db, Ente, Secretaria, Usuario, Contratacao, formatar_moeda
 
 @pytest.fixture
+@pytest.fixture
 def client():
     app.config['TESTING'] = True
     app.config['WTF_CSRF_ENABLED'] = False 
@@ -20,26 +21,29 @@ def client():
             
             db.create_all()
             
-            # 1. Cria a Secretaria e o Ente
-            ente_teste = Ente(nome="Prefeitura Teste")
-            sec_teste = Secretaria(nome="Secretaria de Teste")
-            db.session.add_all([ente_teste, sec_teste])
-            db.session.commit() 
-            
-            # 2. Cria os Usuários (Admin e Comum)
-            senha_hasheada = generate_password_hash("senha_segura_123")
-            usuario_admin = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
-            usuario_comum = Usuario(nome="Comum Teste", login="comum", email="comum@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
-            
-            # 3. Cria uma Contratação prévia
-            contratacao_teste = Contratacao(exercicio=2026, objeto="Notebooks", descricao="TI", valor_estimado=5000.00, dotacao="123", data_planejada=date(2026, 1, 1), secretaria_id=sec_teste.id)
-            
-            db.session.add_all([usuario_admin, usuario_comum, contratacao_teste])
-            db.session.commit()
+            # --- A SOLUÇÃO: Verifica se os dados já existem na memória antes de criar ---
+            if not Secretaria.query.filter_by(nome="Secretaria de Teste").first():
+                # 1. Cria a Secretaria e o Ente
+                ente_teste = Ente(nome="Prefeitura Teste")
+                sec_teste = Secretaria(nome="Secretaria de Teste")
+                db.session.add_all([ente_teste, sec_teste])
+                db.session.commit() 
+                
+                # 2. Cria os Usuários (Admin e Comum)
+                senha_hasheada = generate_password_hash("senha_segura_123")
+                usuario_admin = Usuario(nome="Admin Teste", login="admin", email="admin@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
+                usuario_comum = Usuario(nome="Comum Teste", login="comum", email="comum@teste.com", senha=senha_hasheada, secretaria_id=sec_teste.id)
+                
+                # 3. Cria uma Contratação prévia
+                contratacao_teste = Contratacao(exercicio=2026, objeto="Notebooks", descricao="TI", valor_estimado=5000.00, dotacao="123", data_planejada=date(2026, 1, 1), secretaria_id=sec_teste.id)
+                
+                db.session.add_all([usuario_admin, usuario_comum, contratacao_teste])
+                db.session.commit()
             
             yield client
             
             db.session.remove()
+            # Mantido o código original do seu arquivo para limpeza da memória
             if 'sqlite' in app.config['SQLALCHEMY_DATABASE_URI']:
                 db.drop_all()
 
